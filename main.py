@@ -3,6 +3,7 @@ import argparse
 import os,sys
 import shutil
 import time
+import math
 import os.path as osp
 
 fileDir = os.path.dirname(os.path.abspath(__file__))
@@ -15,19 +16,15 @@ import torch.backends.cudnn as cudnn
 import torch.optim
 import torch.utils.data
 from torch.optim import lr_scheduler
-import torchvision.transforms as transforms
-import torchvision.datasets as datasets
-import torchvision.models as models
 
 import models
 from models.SparseConvNet import *
-import dataset
-from dataset.depth_loader import DepthDataset
-import util.transforms as T
+import datasets
+from datasets.depth_loader import DepthDataset
 from util.utils import AverageMeter, Logger, save_checkpoint
 
 parser = argparse.ArgumentParser(description='PyTorch SparseConvNet Training')
-parser.add_argument('--dataset', default='kitti', choices=dataset.get_names(),
+parser.add_argument('--dataset', default='kitti', choices=datasets.get_names(),
                     help='name of dataset')
 parser.add_argument('--data-root', default='./data', help='root path to datasets')
 parser.add_argument('--save-root', default='./checkpoints', help='root path to datasets')
@@ -36,6 +33,10 @@ parser.add_argument('--arch', '-a', metavar='ARCH', default='sparseconv',
                     help='model architecture: ' +
                         ' | '.join(models.get_names()) +
                         ' (default: sparseconv)')
+parser.add_argument('--height', type=int, default=352,
+                    help="height of an image (default: 256)")
+parser.add_argument('--width', type=int, default=1216,
+                    help="width of an image (default: 128)")
 parser.add_argument('-j', '--workers', default=4, type=int, metavar='N',
                     help='number of data loading workers (default: 4)')
 parser.add_argument('--epochs', default=90, type=int, metavar='N',
@@ -55,7 +56,7 @@ parser.add_argument('--momentum', default=0.9, type=float, metavar='M',
                     help='momentum')
 parser.add_argument('--weight-decay', '--wd', default=1e-4, type=float,
                     metavar='W', help='weight decay (default: 1e-4)')
-parser.add_argument('--print-freq', '-p', default=10, type=int,
+parser.add_argument('--print-freq', '-p', default=1, type=int,
                     metavar='N', help='print frequency (default: 10)')
 parser.add_argument('--resume', default='', type=str, metavar='PATH',
                     help='path to latest checkpoint (default: none)')
@@ -71,6 +72,12 @@ def main():
 
     os.environ['CUDA_VISIBLE_DEVICES'] = args.gpu_ids
     cudnn.benchmark = True
+
+    if not args.evaluate:
+        sys.stdout = Logger(osp.join(args.save_root, 'log_train.txt'))
+    else:
+        sys.stdout = Logger(osp.join(args.save_root, 'log_test.txt'))
+    print("==========\nArgs:{}\n==========".format(args))
 
     # create model
     print("=> creating model '{}'".format(args.arch))
@@ -100,21 +107,11 @@ def main():
         scheduler = lr_scheduler.StepLR(optimizer, step_size=args.step_size, gamma=args.gamma)
 
     print("Initializing dataset {}".format(args.dataset))
-    dataset = dataset.init_dataset(root=osp.join(args.data_root,args.dataset))
-    transform_train = T.Compose([
-        T.ToTensor(),
-    ])
-    transform_val = T.Compose([
-        T.ToTensor(),
-    ])
+    dataset = datasets.init_dataset(args.dataset, root=osp.join(args.data_root,args.dataset))
 
     # Data loading code
-    train_dataset = DepthDataset(
-        args.data_root, dataset.trainset,
-        transforms=transform_train)
-    val_dataset = DepthDataset(
-        args.data_root, dataset.valset,
-        transforms=transform_val)
+    train_dataset = DepthDataset(osp.join(args.data_root,args.dataset), dataset.trainset, args.height, args.width)
+    val_dataset = DepthDataset(osp.join(args.data_root,args.dataset), dataset.valset, args.height, args.width)
 
     train_loader = torch.utils.data.DataLoader(
         train_dataset, batch_size=args.batch_size, shuffle=True,
@@ -174,7 +171,7 @@ def train(train_loader, model, criterion, optimizer, epoch):
         loss = criterion(output, target)
 
         # measure accuracy and record loss
-        rmse.update(torch.sqrt(loss.item()), input.size(0))
+        rmse.update(math.sqrt(loss.item()), input.size(0))
         losses.update(loss.item(), input.size(0))
 
         # compute gradient and do SGD step
@@ -192,7 +189,7 @@ def train(train_loader, model, criterion, optimizer, epoch):
                   'Data {data_time.val:.3f} ({data_time.avg:.3f})\t'
                   'Loss {loss.val:.6f} ({loss.avg:.6f})\t'
                   'RMSE {rmse.val:.6f} ({rmse.avg:.6f})'.format(
-                   epoch, i, len(train_loader), batch_time=batch_time,
+                   epoch+1, i+1, len(train_loader), batch_time=batch_time,
                    data_time=data_time, loss=losses, rmse=rmse))
 
 
@@ -213,7 +210,7 @@ def validate(val_loader, model, criterion):
             loss = criterion(output, target)
 
             # measure accuracy and record loss
-            rmse.update(torch.sqrt(loss.item()), input.size(0))
+            rmse.update(math.sqrt(loss.item()), input.size(0))
             losses.update(loss.item(), input.size(0))
 
             # measure elapsed time

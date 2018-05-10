@@ -16,13 +16,14 @@ class SparseConvNet(nn.Module):
 		convs = []
 		for i in range(len(kernels)):
 			assert (kernels[i]%2==1)
-			convs += SparseConvBlock(channel, mid_channel, kernels[i], padding=(kernels[i]-1)//2)
+			convs += [SparseConvBlock(channel, mid_channel, kernels[i], padding=(kernels[i]-1)//2)]
 			channel = mid_channel
 		self.sparse_convs = nn.Sequential(*convs)
-		self.mask_conv = nn.Conv(mid_channel+1, 1, 1)
+		self.mask_conv = nn.Conv2d(mid_channel+1, 1, 1)
 
 	def forward(self, x):
-		x, m = self.sparse_convs(x)
+		m = torch.Tensor(0)
+		x, m = self.sparse_convs((x,m))
 		x = torch.cat((x,m), dim=1)
 		x = self.mask_conv(x)
 		return x

@@ -12,22 +12,22 @@ class SparseConv(nn.Module):
 		self.conv = nn.Conv2d(in_channels, out_channels, kernel_size, stride=stride, padding=padding, dilation=dilation, bias=False)
 		self.if_bias = bias
 		if self.if_bias:
-			self.bias = torch.Tensor(out_channels, requires_grad=True)
+			self.bias = nn.Parameter(torch.zeros(out_channels).float(), requires_grad=True)
 		self.conv_mask = nn.Conv2d(in_channels, out_channels, kernel_size, stride=stride, padding=padding, dilation=dilation, bias=True)
 		self.pool = nn.MaxPool2d(kernel_size, stride=stride, padding=padding, dilation=dilation)
 
-		nn.init.normal(self.conv.weight, 0.0, 0.02)
+		nn.init.normal_(self.conv.weight, 0.0, 0.02)
 		nn.init.constant_(self.conv_mask.weight, 1)
 		nn.init.constant_(self.conv_mask.bias, 1e-5)
 		self.conv_mask.require_grad = False
 		self.pool.require_grad = False
 
-	def forward(self, x, m=None):
-		if m == None:
+	def forward(self, input):
+		x, m = input
+		if m.dim()==1:
 			assert(x.size(1)==1)
 			m = torch.ones_like(x).float()
 			m[x<0] = 0
-
 		mc = m.expand_as(x)
 		x = x * mc
 		x = self.conv(x)
@@ -46,11 +46,12 @@ class SparseConvBlock(nn.Module):
 		self.sparse_conv = SparseConv(in_channel, out_channel, kernel_size, stride=stride, padding=padding, dilation=dilation, bias=True)
 		self.relu = nn.ReLU(inplace=True)
 
-	def forward(self, x, m=None):
-		x, m = self.sparse_conv(x, m)
+	def forward(self, input):
+		x, m = input
+		x, m = self.sparse_conv((x, m))
 		assert (m.size(1)==1)
 		x = self.relu(x)
-		return x,m
+		return x, m
 
 class SparseAdd(nn.Module):
 	# Add sparse data
