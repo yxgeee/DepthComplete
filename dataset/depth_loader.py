@@ -18,20 +18,30 @@ def depth_read(filename):
 
     depth = depth_png.astype(np.float) / 256.
     depth[depth_png == 0] = -1.
+
     return depth
 
 class DepthDataset(Dataset):
-    """Image Person ReID Dataset"""
-    def __init__(self, data_dir, transform=None):
-        self.data_dir = data_dir
+    def __init__(self, root, dataset, transform=None):
+        self.root = root
+        self.dataset = dataset
         self.transform = transform
+        # TODO transform: flip, scale, crop, eraser
         
     def __len__(self):
-        return len(self.dataset)
+        return len(self.dataset['raw'])
 
     def __getitem__(self, index):
-        img_path, pid, camid = self.dataset[index]
-        img = read_image(img_path)
+        raw_path = osp.join(self.root,self.dataset['raw'][index])
+        gt_path = osp.join(self.root,self.dataset['gt'][index])
+        raw = depth_read(raw_path)
+        assert (raw.shape[0]==1216)
+        assert (raw.shape[1]==352)
+        gt = depth_read(gt_path)
+        assert ((gt<0).sum()==0)
+        
         if self.transform is not None:
-            img = self.transform(img)
-        return img, pid, camid
+            raw = self.transform(raw)
+            gt = self.transform(gt)
+        
+        return raw, gt

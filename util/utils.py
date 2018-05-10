@@ -17,10 +17,6 @@ def mkdir_if_missing(directory):
                 raise
 
 class AverageMeter(object):
-    """Computes and stores the average and current value.
-       
-       Code imported from https://github.com/pytorch/examples/blob/master/imagenet/main.py#L247-L262
-    """
     def __init__(self):
         self.reset()
 

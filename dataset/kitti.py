@@ -5,14 +5,14 @@ import os.path as osp
 from utils.util import write_json, read_json
 
 class Kitti(object):
-	def __init__(self, root='./data/KITTI', **kwargs):
+	def __init__(self, root='./data/kitti', **kwargs):
 		super(Kitti, self).__init__()
 		self.root = root
 		self.raw_split = 'velodyne_raw'
         self.gt_split = 'groundtruth'
 		self.train_split = 'train'
 		self.val_split = 'val'
-		self.test_split = 'depth_selection/test_depth_completion_anonymous/velodyne_raw'
+		self.test_dir = 'depth_selection/test_depth_completion_anonymous/velodyne_raw'
 
 		self.splits = osp.join(self.root, 'splits.json')
 		if not self.splits.exists():
