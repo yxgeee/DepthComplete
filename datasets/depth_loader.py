@@ -53,6 +53,8 @@ class DepthDataset(Dataset):
 
         raw = depth_transform(raw_pil)
         gt = depth_transform(gt_pil)
+        # raw = raw / gt.max()
+        # gt = gt / gt.max()
         # assert ((gt<0).sum()==0)
         # TODO GT mask
         raw = self.totensor(raw).float()
