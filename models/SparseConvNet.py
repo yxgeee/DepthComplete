@@ -28,4 +28,5 @@ class SparseConvNet(nn.Module):
 		x, m = self.sparse_convs((x,m))
 		x = torch.cat((x,m), dim=1)
 		x = self.mask_conv(x)
+		x = F.relu(x, inplace=True)
 		return x

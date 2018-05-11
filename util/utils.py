@@ -109,7 +109,7 @@ class Evaluate(object):
         target = target[valid_mask]
 
         abs_diff = (output - target).abs()
-        abs_log_diff = (torch.log(output) - torch.log(target)).abs()
+        abs_log_diff = (torch.log(output+1e-6) - torch.log(target+1e-6)).abs()
 
         self.rmse = math.sqrt((torch.pow(abs_diff, 2)).mean())
         self.mae = abs_diff.mean()
