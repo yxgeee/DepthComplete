@@ -32,7 +32,7 @@ class DepthDataset(Dataset):
         return len(self.dataset['raw'])
 
     def transform(self, raw, gt):
-        # Random crop
+        # Random rotate
         if not self.isVal:
             angle = np.random.uniform(-5.0, 5.0)
             raw = TF.rotate(raw, angle, resample=Image.NEAREST)

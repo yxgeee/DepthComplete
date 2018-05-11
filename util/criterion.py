@@ -62,7 +62,7 @@ class BerHuLoss(nn.Module):
         diff = target - pred
         diff = diff[valid_mask].abs()
 
-        delta = self.threshold * diff.max()
+        delta = self.threshold * diff.max().item()
 
         part1 = -F.threshold(-diff, -delta, 0.)
         part2 = F.threshold(diff**2 - delta**2, 0., -delta**2.) + delta**2
