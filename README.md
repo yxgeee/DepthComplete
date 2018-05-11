@@ -10,7 +10,8 @@
 
 ## TODO
 - SparseConv baseline model training and evaluation, compared with different losses and optimization schedulers.
-- Data augmentation rules.
+- Data augmentation rules. (generate sparse data)
+- Sparse-to-dense structure.
 - SparseConv based residual structure, u-net struture, etc.
 - Crf
 
@@ -34,3 +35,4 @@ ln -s /your/path/to/kitti/ data/kitti
 sh scripts/train.sh
 ```
 
+## Experiments

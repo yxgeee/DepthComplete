@@ -13,17 +13,18 @@ import torchvision.transforms.functional as TF
 def depth_transform(pil_img):
     depth_png = np.array(pil_img, dtype=int)[:,:,np.newaxis]
     # make sure we have a proper 16bit depth map here.. not 8bit!
-    # assert(np.max(depth_png) > 255)
+    assert(np.max(depth_png) > 255)
     depth = depth_png.astype(np.float) / 256.
     depth[depth_png == 0] = -1.
     return depth
 
 class DepthDataset(Dataset):
-    def __init__(self, root, dataset, height, width):
+    def __init__(self, root, dataset, height, width, isVal=False):
         self.root = root
         self.dataset = dataset
         self.height = height
         self.width = width
+        self.isVal = isVal
         self.totensor = T.ToTensor()
         # TODO transform: flip, scale/crop, eraser
         
@@ -32,13 +33,21 @@ class DepthDataset(Dataset):
 
     def transform(self, raw, gt):
         # Random crop
+        if not self.isVal:
+            angle = np.random.uniform(-5.0, 5.0)
+            raw = TF.rotate(raw, angle, resample=Image.NEAREST)
+            gt = TF.rotate(raw, angle, resample=Image.NEAREST)
+
+        # Random crop
         i, j, h, w = T.RandomCrop.get_params(
             raw, output_size=(self.height, self.width))
+        if self.isVal:
+            i, j = 0, 0
         raw = TF.crop(raw, i, j, h, w)
         gt = TF.crop(gt, i, j, h, w)
 
         # Random horizontal flipping
-        if random.random() > 0.5:
+        if random.random() > 0.5 and not self.isVal:
             raw = TF.hflip(raw)
             gt = TF.hflip(gt)
         return raw, gt
@@ -53,11 +62,15 @@ class DepthDataset(Dataset):
 
         raw = depth_transform(raw_pil)
         gt = depth_transform(gt_pil)
-        # raw = raw / gt.max()
-        # gt = gt / gt.max()
-        # assert ((gt<0).sum()==0)
-        # TODO GT mask
-        raw = self.totensor(raw).float()
-        gt = self.totensor(gt).float()
+
+        # scale to [0,1]
+        scale = raw.max()
+        gt_s = gt / scale
+        raw_s = raw / scale
+        gt_s[gt<0] = -1
+        raw_s[raw<0] = -1
+
+        raw_s = self.totensor(raw_s).float()
+        gt_s = self.totensor(gt_s).float()
         
-        return raw, gt
+        return raw_s, gt_s, scale*256.
