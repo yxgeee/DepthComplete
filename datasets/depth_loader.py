@@ -64,7 +64,8 @@ class DepthDataset(Dataset):
         gt = depth_transform(gt_pil)
 
         # scale to [0,1]
-        scale = raw.max()
+        # scale = raw.max()
+        scale = 1
         gt_s = gt / scale
         raw_s = raw / scale
         gt_s[gt<0] = -1
