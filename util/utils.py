@@ -4,6 +4,7 @@ import sys
 import errno
 import shutil
 import json
+import math
 import os.path as osp
 
 import torch
@@ -84,3 +85,41 @@ def write_json(obj, fpath):
     mkdir_if_missing(osp.dirname(fpath))
     with open(fpath, 'w') as f:
         json.dump(obj, f, indent=4, separators=(',', ': '))
+
+class Evaluate(object):
+    def __init__(self):
+        self.irmse, self.imae = 0, 0
+        self.rmse, self.mae = 0, 0
+        self.log_rmse, self.log_mae = 0, 0
+        self.absrel, self.sqrel = 0, 0
+
+    def pipline(self):
+        return self.rmse
+
+    # def update(self, irmse, imae, rmse, mae, log_rmse, log_mae, absrel, sqrel):
+    def update(self, result):
+        self.irmse, self.imae = result.irmse, result.imae
+        self.rmse, self.mae = result.rmse, result.mae
+        self.log_rmse, self.log_mae = result.log_rmse, result.log_mae
+        self.absrel, self.sqrel = result.absrel, result.sqrel
+
+    def evaluate(self, output, target):
+        valid_mask = (target>0).detach()
+        output = output[valid_mask]
+        target = target[valid_mask]
+
+        abs_diff = (output - target).abs()
+        abs_log_diff = (torch.log(output) - torch.log(target)).abs()
+
+        self.rmse = math.sqrt((torch.pow(abs_diff, 2)).mean())
+        self.mae = abs_diff.mean()
+        self.log_rmse = math.sqrt((torch.pow(abs_log_diff, 2)).mean())
+        self.log_mae = abs_log_diff.mean()
+        self.absrel = (abs_diff / target).mean()
+        self.sqrel = (torch.pow(abs_diff, 2) / (torch.pow(target, 2))).mean()
+
+        inv_output = 1 / output
+        inv_target = 1 / target
+        abs_inv_diff = (inv_output - inv_target).abs()
+        self.irmse = math.sqrt((torch.pow(abs_inv_diff, 2)).mean())
+        self.imae = abs_inv_diff.mean()

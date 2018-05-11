@@ -9,3 +9,6 @@ ln -s /your/path/to/kitti/ data/kitti
 ```
 python main.py --gpu-ids 0,1,2,3 -b 32 --save-root checkpoints/kitti
 ```
+
+### TODO
+1. log RMSE loss
