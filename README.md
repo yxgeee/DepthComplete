@@ -1,5 +1,4 @@
-# Pytorch implementation of depth completion
-(updating)
+# Pytorch implementation of depth completion (updating)
 
 ## Dependencies
 - Python 2.7.*
@@ -30,7 +29,7 @@ unzip all downloaded zip files in the root path of kitti directory
 mkdir data
 ln -s /your/path/to/kitti/ data/kitti
 ```
-## Train
+### Train
 ```
 sh scripts/train.sh
 ```
