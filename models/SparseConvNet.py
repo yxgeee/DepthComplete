@@ -22,8 +22,6 @@ class SparseConvNet(nn.Module):
 		self.mask_conv = nn.Conv2d(mid_channel+1, 1, 1)
 
 	def forward(self, x):
-		# m = torch.ones_like(x).float()
-		# m[x<0] = 0
 		m = (x>0).detach().float()
 		x, m = self.sparse_convs((x,m))
 		x = torch.cat((x,m), dim=1)
