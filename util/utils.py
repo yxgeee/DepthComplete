@@ -97,11 +97,11 @@ class Evaluate(object):
         return self.rmse
 
     # def update(self, irmse, imae, rmse, mae, log_rmse, log_mae, absrel, sqrel):
-    def update(self, result):
-        self.irmse, self.imae = result.irmse, result.imae
-        self.rmse, self.mae = result.rmse, result.mae
-        self.log_rmse, self.log_mae = result.log_rmse, result.log_mae
-        self.absrel, self.sqrel = result.absrel, result.sqrel
+    # def update(self, result):
+    #     self.irmse, self.imae = result.irmse, result.imae
+    #     self.rmse, self.mae = result.rmse, result.mae
+    #     self.log_rmse, self.log_mae = result.log_rmse, result.log_mae
+    #     self.absrel, self.sqrel = result.absrel, result.sqrel
 
     def evaluate(self, output, target):
         valid_mask = (target>0).detach()

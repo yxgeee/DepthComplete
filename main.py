@@ -36,6 +36,7 @@ parser.add_argument('--arch', '-a', metavar='ARCH', default='sparseconv',
                     help='model architecture: ' +
                         ' | '.join(models.get_names()) +
                         ' (default: sparseconv)')
+parser.add_argument('--tag', default='', help='tag in save path')
 parser.add_argument('--height', type=int, default=352,
                     help="height of an image (default: 256)")
 parser.add_argument('--width', type=int, default=1216,
@@ -68,20 +69,26 @@ parser.add_argument('-e', '--evaluate', dest='evaluate', action='store_true',
                     help='evaluate model on validation set')
 parser.add_argument('--gpu-ids', default='0', type=str, help='gpu device ids for CUDA_VISIBLE_DEVICES')
 
-best_pipline = np.inf
 
 def main():
-    global args, min_rmse
+    global args
     args = parser.parse_args()
+    best_epoch = 0 
+    best_pipline = np.inf
 
     os.environ['CUDA_VISIBLE_DEVICES'] = args.gpu_ids
     cudnn.benchmark = True
 
-    args.save_root = osp.join(args.save_root, args.dataset, args.arch+'_'+args.criterion)
-
-    if not args.evaluate:
+    if args.tag:
+        save_name = args.arch+'_'+args.criterion + '_'+args.tag
+    else:
+        save_name = args.arch+'_'+args.criterion
+    args.save_root = osp.join(args.save_root, args.dataset, save_name)
+    if not args.evaluate:        
         sys.stdout = Logger(osp.join(args.save_root, 'log_train.txt'))
     else:
+        if args.resume:
+            args.save_root = osp.dirname(args.resume)
         sys.stdout = Logger(osp.join(args.save_root, 'log_test.txt'))
     print("==========\nArgs:{}\n==========".format(args))
 
@@ -95,7 +102,8 @@ def main():
             print("=> loading checkpoint '{}'".format(args.resume))
             checkpoint = torch.load(args.resume)
             args.start_epoch = checkpoint['epoch']
-            min_rmse = checkpoint['min_rmse']
+            best_epoch = checkpoint['epoch']
+            best_pipline = checkpoint['rmse']
             model.load_state_dict(checkpoint['state_dict'])
             optimizer.load_state_dict(checkpoint['optimizer'])
             print("=> loaded checkpoint '{}' (epoch {})"
@@ -131,7 +139,6 @@ def main():
         validate(val_loader, model, criterion)
         return
 
-    best_epoch = 0 
     print("==> Start training")
     for epoch in range(args.start_epoch, args.epochs):
         # train for one epoch
