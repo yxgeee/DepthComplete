@@ -14,7 +14,7 @@ def depth_transform(pil_img):
     depth_png = np.array(pil_img, dtype=int)[:,:,np.newaxis]
     # make sure we have a proper 16bit depth map here.. not 8bit!
     # assert(np.max(depth_png) > 255)
-    depth = depth_png.astype(np.float) / 256. / 255.
+    depth = depth_png.astype(np.float) / 256.
     depth[depth_png == 0] = -1.
     return depth
 

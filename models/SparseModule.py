@@ -24,10 +24,6 @@ class SparseConv(nn.Module):
 
 	def forward(self, input):
 		x, m = input
-		if m.dim()==1:
-			assert(x.size(1)==1)
-			m = torch.ones_like(x).float()
-			m[x<0] = 0
 		mc = m.expand_as(x)
 		x = x * mc
 		x = self.conv(x)

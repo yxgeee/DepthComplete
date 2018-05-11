@@ -12,6 +12,7 @@ sys.path.insert(0, fileDir)
 import torch
 import torch.nn as nn
 import torch.nn.parallel
+import torch.nn.functional as F
 import torch.backends.cudnn as cudnn
 import torch.optim
 import torch.utils.data
@@ -98,8 +99,6 @@ def main():
             print("=> no checkpoint found at '{}'".format(args.resume))
 
     model = torch.nn.DataParallel(model).cuda()
-    # define loss function (criterion) and optimizer
-    criterion = nn.MSELoss().cuda()
     optimizer = torch.optim.SGD(model.parameters(), args.lr,
                                 momentum=args.momentum,
                                 weight_decay=args.weight_decay)
@@ -129,14 +128,14 @@ def main():
     print("==> Start training")
     for epoch in range(args.start_epoch, args.epochs):
         # train for one epoch
-        train(train_loader, model, criterion, optimizer, epoch)
+        train(train_loader, model, optimizer, epoch)
 
         if args.step_size > 0: scheduler.step()
         
         # evaluate on validation set
         if args.eval_step > 0 and (epoch+1) % args.eval_step == 0 or (epoch+1) == args.epochs:
             print("==> Test")
-            rmse = validate(val_loader, model, criterion)
+            rmse = validate(val_loader, model)
 
             is_best = rmse < min_rmse
             if is_best: 
@@ -153,27 +152,34 @@ def main():
     print("==> Minimal RMSE {:.1%}, achieved at epoch {}".format(min_rmse, best_epoch))
 
 
-def train(train_loader, model, criterion, optimizer, epoch):
+def train(train_loader, model, optimizer, epoch):
     batch_time = AverageMeter()
-    data_time = AverageMeter()
     losses = AverageMeter()
+    losses_value = AverageMeter()
     rmse = AverageMeter()
+    rmse_value = AverageMeter()
 
     model.train()
 
     end = time.time()
     for i, (input, target) in enumerate(train_loader):
         # measure data loading time
-        data_time.update(time.time() - end)
         input, target = input.cuda(), target.cuda()
+        target_mask = torch.ones_like(target).float().cuda()
+        target_mask[target<0] = 0
         # compute output
         output = model(input)
-        loss = criterion(output, target)
 
+        loss_ele = F.mse_loss(output, target, reduce=False)
+        loss_all = loss_ele.mean()
+        loss_value = (loss_ele * target_mask).sum() / target_mask.sum()
         # measure accuracy and record loss
-        rmse.update(math.sqrt(loss.item()), input.size(0))
-        losses.update(loss.item(), input.size(0))
+        rmse.update(math.sqrt(loss_all.item()), input.size(0))
+        rmse_value.update(math.sqrt(loss_value.item()), input.size(0))
+        losses.update(loss_all.item(), input.size(0))
+        losses_value.update(loss_value.item(), input.size(0))
 
+        loss = loss_all + loss_value
         # compute gradient and do SGD step
         optimizer.zero_grad()
         loss.backward()
@@ -186,17 +192,20 @@ def train(train_loader, model, criterion, optimizer, epoch):
         if i % args.print_freq == 0:
             print('Epoch: [{0}][{1}/{2}]\t'
                   'Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
-                  'Data {data_time.val:.3f} ({data_time.avg:.3f})\t'
-                  'Loss {loss.val:.6f} ({loss.avg:.6f})\t'
-                  'RMSE {rmse.val:.6f} ({rmse.avg:.6f})'.format(
+                  'Loss_all {loss_all.val:.4f} ({loss_all.avg:.4f})\t'
+                  'Loss_value {loss_value.val:.4f} ({loss_value.avg:.4f})\t'
+                  'RMSE_all {rmse_all.val:.4f} ({rmse_all.avg:.4f})\t'
+                  'RMSE_value {rmse_value.val:.4f} ({rmse_value.avg:.4f})'.format(
                    epoch+1, i+1, len(train_loader), batch_time=batch_time,
-                   data_time=data_time, loss=losses, rmse=rmse))
+                   loss_all=losses, loss_value=losses_value, rmse_all=rmse, rmse_value=rmse_value))
 
 
-def validate(val_loader, model, criterion):
+def validate(val_loader, model):
     batch_time = AverageMeter()
     losses = AverageMeter()
+    losses_value = AverageMeter()
     rmse = AverageMeter()
+    rmse_value = AverageMeter()
 
     model.eval()
 
@@ -204,14 +213,20 @@ def validate(val_loader, model, criterion):
         end = time.time()
         for i, (input, target) in enumerate(val_loader):
             input, target = input.cuda(), target.cuda()
+            target_mask = torch.ones_like(target).float().cuda()
+            target_mask[target<0] = 0
 
             # compute output
             output = model(input)
-            loss = criterion(output, target)
-
+            # loss = criterion(output, target)
+            loss_ele = F.mse_loss(output, target, reduce=False)
+            loss = loss_ele.mean()
+            loss_value = (loss_ele * target_mask).sum() / target_mask.sum()
             # measure accuracy and record loss
-            rmse.update(math.sqrt(loss.item()), input.size(0))
-            losses.update(loss.item(), input.size(0))
+            rmse.update(math.sqrt(loss_all.item()), input.size(0))
+            rmse_value.update(math.sqrt(loss_value.item()), input.size(0))
+            losses.update(loss_all.item(), input.size(0))
+            losses_value.update(loss_value.item(), input.size(0))
 
             # measure elapsed time
             batch_time.update(time.time() - end)
@@ -220,10 +235,12 @@ def validate(val_loader, model, criterion):
             if i % args.print_freq == 0:
                 print('Test: [{0}/{1}]\t'
                       'Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
-                      'Loss {loss.val:.6f} ({loss.avg:.6f})\t'
-                      'RMSE {rmse.val:.6f} ({rmse.avg:.6f})'.format(
-                       i, len(val_loader), batch_time=batch_time, loss=losses,
-                       rmse=rmse))
+                      'Loss_all {loss_all.val:.4f} ({loss_all.avg:.4f})\t'
+                      'Loss_value {loss_value.val:.4f} ({loss_value.avg:.4f})\t'
+                      'RMSE_all {rmse_all.val:.4f} ({rmse_all.avg:.4f})\t'
+                      'RMSE_value {rmse_value.val:.4f} ({rmse_value.avg:.4f})'.format(
+                       i, len(val_loader), batch_time=batch_time, 
+                       loss_all=losses, loss_value=losses_value, rmse_all=rmse, rmse_value=rmse_value))
 
         print(' * RMSE {rmse.avg:.6f}'.format(rmse=rmse))
 
