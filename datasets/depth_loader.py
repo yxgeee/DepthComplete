@@ -27,7 +27,7 @@ class DepthDataset(Dataset):
         self.isVal = isVal
         self.totensor = T.ToTensor()
         # TODO transform: flip, scale/crop, eraser
-        
+
     def __len__(self):
         return len(self.dataset['raw'])
 
@@ -73,5 +73,5 @@ class DepthDataset(Dataset):
 
         raw_s = self.totensor(raw_s).float()
         gt_s = self.totensor(gt_s).float()
-        
+
         return raw_s, gt_s, scale*256.

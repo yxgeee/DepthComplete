@@ -10,7 +10,7 @@
 
 ## TODO
 - SparseConv baseline model training and evaluation, compared with different losses and optimization schedulers.
-- Data augmentation rules. (generate sparse data)
+- Data augmentation rules. (generate sparse data, crop size)
 - Sparse-to-dense structure.
 - SparseConv based residual structure, u-net struture, etc.
 - Crf

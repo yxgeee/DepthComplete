@@ -6,6 +6,7 @@ import shutil
 import json
 import math
 import os.path as osp
+import matplotlib.pyplot as plt
 
 import torch
 
@@ -123,3 +124,12 @@ class Evaluate(object):
         abs_inv_diff = (inv_output - inv_target).abs()
         self.irmse = math.sqrt((torch.pow(abs_inv_diff, 2)).mean())
         self.imae = abs_inv_diff.mean()
+
+cmap = plt.cm.viridis
+def colored_depthmap(depth, d_min=None, d_max=None):
+    if d_min is None:
+        d_min = np.min(depth)
+    if d_max is None:
+        d_max = np.max(depth)
+    depth_relative = (depth - d_min) / (d_max - d_min)
+    return 255 * cmap(depth_relative)[:,:,:3] # H, W, C

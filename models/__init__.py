@@ -3,9 +3,11 @@
 from __future__ import absolute_import
 
 from .SparseConvNet import *
+from .StoDNet import *
 
 __factory = {
     'sparseconv': SparseConvNet,
+    'sparsetodense': StoDResNet,
 }
 
 def get_names():
