@@ -73,7 +73,7 @@ parser.add_argument('--gpu-ids', default='0', type=str, help='gpu device ids for
 def main():
     global args
     args = parser.parse_args()
-    best_epoch = 0 
+    best_epoch = 0
     best_pipline = np.inf
 
     os.environ['CUDA_VISIBLE_DEVICES'] = args.gpu_ids
@@ -84,7 +84,7 @@ def main():
     else:
         save_name = args.arch+'_'+args.criterion
     args.save_root = osp.join(args.save_root, args.dataset, save_name)
-    if not args.evaluate:        
+    if not args.evaluate:
         sys.stdout = Logger(osp.join(args.save_root, 'log_train.txt'))
     else:
         if args.resume:
@@ -97,6 +97,7 @@ def main():
     model = models.init_model(name=args.arch)
     print("Model size: {:.5f}M".format(sum(p.numel() for p in model.parameters())/1000000.0))
     # optionally resume from a checkpoint
+    optimizer = torch.optim.Adam(model.parameters(), args.lr)
     if args.resume:
         if os.path.isfile(args.resume):
             print("=> loading checkpoint '{}'".format(args.resume))
@@ -115,8 +116,7 @@ def main():
     # optimizer = torch.optim.SGD(model.parameters(), args.lr,
     #                             momentum=args.momentum,
     #                             weight_decay=args.weight_decay)
-    optimizer = torch.optim.Adam(model.parameters(), args.lr)
-    criterion = init_criterion(args.criterion)
+    criterion = init_criterion(args.criterion).cuda()
     if args.step_size > 0:
         scheduler = lr_scheduler.StepLR(optimizer, step_size=args.step_size, gamma=args.gamma)
 
@@ -145,14 +145,14 @@ def main():
         train(train_loader, model, optimizer, criterion, epoch)
 
         if args.step_size > 0: scheduler.step()
-        
+
         # evaluate on validation set
         if args.eval_step > 0 and (epoch+1) % args.eval_step == 0 or (epoch+1) == args.epochs:
             print("==> Test")
             rmse = validate(val_loader, model, criterion)
 
             is_best = rmse < best_pipline
-            if is_best: 
+            if is_best:
                 best_epoch = epoch + 1
                 best_pipline = rmse
             save_checkpoint({
@@ -163,7 +163,7 @@ def main():
                 'optimizer' : optimizer.state_dict(),
             }, is_best, osp.join(args.save_root, 'checkpoint_ep' + str(epoch+1) + '.pth.tar'))
 
-    print("==> Minimal RMSE {:.1%}, achieved at epoch {}".format(best_pipline, best_epoch))
+    print("==> Minimal RMSE {:.6f}, achieved at epoch {}".format(best_pipline, best_epoch))
 
 
 def train(train_loader, model, optimizer, criterion, epoch):
@@ -236,7 +236,7 @@ def validate(val_loader, model, criterion):
                       'Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
                       'Loss {loss.val:.6f} ({loss.avg:.6f})\t'
                       'RMSE {rmse.val:.6f} ({rmse.avg:.6f})'.format(
-                       i, len(val_loader), batch_time=batch_time, 
+                       i, len(val_loader), batch_time=batch_time,
                        loss=losses, rmse=rmses))
 
         print(' * RMSE {rmse.avg:.6f}'.format(rmse=rmses))

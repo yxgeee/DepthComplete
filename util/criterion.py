@@ -55,7 +55,7 @@ class BerHuLoss(nn.Module):
     def __init__(self, threshold=0.2):
         super(BerHuLoss, self).__init__()
         self.threshold = threshold
-    
+
     def forward(self, pred, target):
         assert pred.dim() == target.dim(), "inconsistent dimensions"
         valid_mask = (target>0).detach()
@@ -75,7 +75,7 @@ __factory = {
     'masked_mseloss': MaskedMSELoss,
     'masked_maeloss': MaskedMAELoss,
     'masked_log_mseloss': MaskedLogMSELoss,
-    'masked_log_mseloss': MaskedLogMAELoss,
+    'masked_log_maeloss': MaskedLogMAELoss,
     'berhuloss': BerHuLoss,
 }
 
