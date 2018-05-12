@@ -26,7 +26,7 @@ from datasets.depth_loader import DepthDataset
 from util.utils import AverageMeter, Logger, save_checkpoint, Evaluate
 from util.criterion import init_criterion, get_criterions
 
-parser = argparse.ArgumentParser(description='PyTorch SparseConvNet Training')
+parser = argparse.ArgumentParser(description='PyTorch Depth Completion Training')
 parser.add_argument('--dataset', default='kitti', choices=datasets.get_names(),
                     help='name of dataset')
 parser.add_argument('--data-root', default='./data', help='root path to datasets')
@@ -98,6 +98,9 @@ def main():
     print("Model size: {:.5f}M".format(sum(p.numel() for p in model.parameters())/1000000.0))
     # optionally resume from a checkpoint
     optimizer = torch.optim.Adam(model.parameters(), args.lr)
+    # optimizer = torch.optim.SGD(model.parameters(), args.lr,
+    #                             momentum=args.momentum,
+    #                             weight_decay=args.weight_decay)
     if args.resume:
         if os.path.isfile(args.resume):
             print("=> loading checkpoint '{}'".format(args.resume))
@@ -113,9 +116,6 @@ def main():
             print("=> no checkpoint found at '{}'".format(args.resume))
 
     model = torch.nn.DataParallel(model).cuda()
-    # optimizer = torch.optim.SGD(model.parameters(), args.lr,
-    #                             momentum=args.momentum,
-    #                             weight_decay=args.weight_decay)
     criterion = init_criterion(args.criterion).cuda()
     if args.step_size > 0:
         scheduler = lr_scheduler.StepLR(optimizer, step_size=args.step_size, gamma=args.gamma)

@@ -155,7 +155,7 @@ def choose_decoder(decoder, in_channels):
 
 
 class StoDResNet(nn.Module):
-    def __init__(self, layers, decoder, height, width, in_channels=1, out_channels=1, pretrained=True):
+    def __init__(self, layers=18, decoder='upproj', in_channels=1, out_channels=1, pretrained=True):
 
         if layers not in [18, 34, 50, 101, 152]:
             raise RuntimeError('Only 18, 34, 50, 101, and 152 layer model are defined for ResNet. Got {}'.format(layers))
@@ -194,7 +194,7 @@ class StoDResNet(nn.Module):
 
         # setting bias=true doesn't improve accuracy
         self.conv3 = nn.Conv2d(num_channels//32,out_channels,kernel_size=3,stride=1,padding=1,bias=False)
-        self.bilinear = nn.Upsample(size=(height, width), mode='bilinear')
+        # self.bilinear = nn.Upsample(size=(height, width), mode='bilinear')
 
         # weight init
         self.conv2.apply(weights_init)
@@ -203,6 +203,8 @@ class StoDResNet(nn.Module):
         self.conv3.apply(weights_init)
 
     def forward(self, x):
+        height = x.size(2)
+        width = x.size(3)
         # resnet
         x = self.conv1(x)
         x = self.bn1(x)
@@ -219,6 +221,7 @@ class StoDResNet(nn.Module):
         # decoder
         x = self.decoder(x)
         x = self.conv3(x)
-        x = self.bilinear(x)
+        x = F.upsample(x, size=(height, width), mode='bilinear')
+        # x = self.bilinear(x)
 
         return x
