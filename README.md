@@ -40,7 +40,7 @@ sh scripts/test.sh ./checkpoints/kitti/sparseconv_masked_maeloss 0 sparseconv
 ```
 
 ## Experiments
-|    Method    |  MAE  |  RMSE  |  iMAE  |  iRMSE  | 
-| :----------- | :---: | :----: | :----: | :-----: |
-| SparseConv(maeloss)   | 0.508195  | 1.730340   |  0.002170 | 0.006691 |
-| SparseConv(log_maeloss)   | 0.530156  | 1.744890   |  0.002275 | 0.006768 |
+|    Method                 |    MAE   |  RMSE    |  iMAE    |  iRMSE   | 
+| :------------------------ | :------: | :------: | :------: | :------: |
+| SparseConv(maeloss)       | 0.462935 | 1.731169 | 0.001959 | 0.006377 |
+| SparseConv(log_maeloss)   | 0.479404 | 1.738473 | 0.002044 | 0.006431 |

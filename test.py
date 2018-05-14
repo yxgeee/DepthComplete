@@ -90,6 +90,7 @@ def main():
 
             input = torch.unsqueeze(raw,0).cuda()
             output = model(input) * 256.
+            raw = raw * 256.
 
             output = output[0].cpu()
             output = raw*valid_mask + output*(1-valid_mask)
