@@ -42,16 +42,6 @@ parser.add_argument('--arch', '-a', metavar='ARCH', default='sparseconv',
                         ' | '.join(models.get_names()) +
                         ' (default: sparseconv)')
 parser.add_argument('--tag', default='test', help='tag in save path')
-parser.add_argument('--height', type=int, default=352,
-                    help="height of an image (default: 256)")
-parser.add_argument('--width', type=int, default=1216,
-                    help="width of an image (default: 128)")
-parser.add_argument('-j', '--workers', default=4, type=int, metavar='N',
-                    help='number of data loading workers (default: 4)')
-parser.add_argument('-b', '--batch-size', default=64, type=int,
-                    metavar='N', help='mini-batch size (default: 64)')
-parser.add_argument('--print-freq', '-p', default=10, type=int,
-                    metavar='N', help='print frequency (default: 10)')
 parser.add_argument('--gpu-ids', default='0', type=str, help='gpu device ids for CUDA_VISIBLE_DEVICES')
 
 
@@ -62,7 +52,9 @@ def main():
     os.environ['CUDA_VISIBLE_DEVICES'] = args.gpu_ids
     cudnn.benchmark = True
 
-    args.save_root = osp.join(args.save_root, args.dataset, args.tag)
+    args.save_root = osp.join(args.save_root, args.dataset, args.tag, 'results')
+    if not osp.isdir(args.save_root):
+        os.mkdir(args.save_root)
     print("==========\nArgs:{}\n==========".format(args))
 
     # create model
@@ -83,17 +75,19 @@ def main():
     print("Initializing dataset {}".format(args.dataset))
     dataset = datasets.init_dataset(args.dataset, root=osp.join(args.data_root,args.dataset))
 
+    to_pil = T.ToPILImage()
+
     print("===> Start testing")
     with torch.no_grad():
-        for img in dataset.valset_select:
+        for img in dataset.valset_select['raw']:
             raw_path = osp.join(args.data_root,args.dataset,img)
             raw_pil = Image.open(raw_path)
             raw = depth_transform(raw_pil)
             raw = TF.to_tensor(raw).float()
             input = torch.unsqueeze(raw,0).cuda()
-            output = model(input) * 256
-            pil_img = output[0].cpu().int16().ToPILImage()
-            pil_img.save(osp.join(args.save_root, img))
+            output = model(input) * 256.
+            pil_img = to_pil(output[0].cpu().int())
+            pil_img.save(osp.join(args.save_root, osp.basename(img)))
             print(img+' finish.')
 
 if __name__ == '__main__':

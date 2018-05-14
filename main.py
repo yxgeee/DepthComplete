@@ -97,10 +97,10 @@ def main():
     model = models.init_model(name=args.arch)
     print("Model size: {:.5f}M".format(sum(p.numel() for p in model.parameters())/1000000.0))
     # optionally resume from a checkpoint
-    optimizer = torch.optim.Adam(model.parameters(), args.lr)
-    # optimizer = torch.optim.SGD(model.parameters(), args.lr,
-    #                             momentum=args.momentum,
-    #                             weight_decay=args.weight_decay)
+    # optimizer = torch.optim.Adam(model.parameters(), args.lr)
+    optimizer = torch.optim.SGD(model.parameters(), args.lr,
+                                momentum=args.momentum,
+                                weight_decay=args.weight_decay)
     if args.resume:
         if os.path.isfile(args.resume):
             print("=> loading checkpoint '{}'".format(args.resume))

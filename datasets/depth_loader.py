@@ -1,5 +1,6 @@
 from __future__ import print_function, absolute_import
 import os
+import random
 from PIL import Image
 import numpy as np
 import os.path as osp
@@ -66,6 +67,8 @@ class DepthDataset(Dataset):
         # scale to [0,1]
         # scale = raw.max()
         scale = 1
+        if not self.isVal:
+            scale = random.uniform(1,1.5)
         gt_s = gt / scale
         raw_s = raw / scale
         gt_s[gt<0] = -1
