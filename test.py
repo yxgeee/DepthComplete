@@ -91,9 +91,9 @@ def main():
             input = torch.unsqueeze(raw,0).cuda()
             output = model(input) * 256.
 
-            output = output[0]
+            output = output[0].cpu()
             output = raw*valid_mask + output*(1-valid_mask)
-            pil_img = to_pil(output.cpu().int())
+            pil_img = to_pil(output.int())
             pil_img.save(osp.join(save_root, osp.basename(img)))
             print(img+' finish.')
 
