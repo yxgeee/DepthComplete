@@ -86,9 +86,14 @@ def main():
             raw_pil = Image.open(raw_path)
             raw = depth_transform(raw_pil)
             raw = TF.to_tensor(raw).float()
+            valid_mask = (raw>0).detach().float()
+
             input = torch.unsqueeze(raw,0).cuda()
             output = model(input) * 256.
-            pil_img = to_pil(output[0].cpu().int())
+
+            output = output[0]
+            output = raw*valid_mask + output*(1-valid_mask)
+            pil_img = to_pil(output.cpu().int())
             pil_img.save(osp.join(save_root, osp.basename(img)))
             print(img+' finish.')
 

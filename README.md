@@ -5,15 +5,15 @@
 - [PyTorch](http://pytorch.org/) (0.4.0)
 
 ## Support
-- [Kitti](http://www.cvlibs.net/datasets/kitti/index.php) depth dataset
+- [Kitti](http://www.cvlibs.net/datasets/kitti/eval_depth.php?benchmark=depth_completion) depth complete dataset
 - SparseConv structure released by [Sparsity Invariant CNNs](http://arxiv.org/abs/1708.06500)
 - Sparse-to-dense structure released by [Sparse-to-Dense: Depth Prediction from Sparse Depth Samples and a Single Image](https://arxiv.org/pdf/1709.07492.pdf)
 
 ## TODO
 - SparseConv baseline model training and evaluation, compared with different losses and optimization schedulers.
 - Data augmentation rules. (generate sparse data, crop size)
-- SparseConv based residual structure, u-net struture, etc.
-- Crf
+- SparseConv based residual structure, u-net structure, etc.
+- Crf post-process or end-to-end training
 
 ## How to use
 
