@@ -53,7 +53,7 @@ def main():
 
     args.resume = osp.join(args.resume, 'best_model.pth.tar')
 
-    save_root = osp.join(osp.dirname(resume), 'results')
+    save_root = osp.join(osp.dirname(args.resume), 'results')
     # args.save_root = osp.join(args.save_root, args.dataset, args.tag, 'results')
     if not osp.isdir(save_root):
         os.makedirs(save_root)
