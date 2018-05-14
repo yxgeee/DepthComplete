@@ -34,8 +34,13 @@ ln -s /your/path/to/kitti/ data/kitti
 ```
 sh scripts/train.sh
 ```
+### Test
+```
+sh scripts/test.sh /your/dirname/to/model/ (eg. ./checkpoints/kitti/sparseconv_masked_maeloss)
+```
 
 ## Experiments
 |    Method    |  MAE  |  RMSE  |  iMAE  |  iRMSE  | 
 | :----------- | :---: | :----: | :----: | :-----: |
-| SparseConv   | 0.508195  | 1.730340   |  0.002170 | 0.006691 |
+| SparseConv(maeloss)   | 0.508195  | 1.730340   |  0.002170 | 0.006691 |
+| SparseConv(log_maeloss)   | 0.530156  | 1.744890   |  0.002275 | 0.006768 |
