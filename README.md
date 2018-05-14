@@ -36,7 +36,7 @@ sh scripts/train.sh
 ```
 ### Test
 ```
-sh scripts/test.sh /your/dirname/to/model/ (eg ./checkpoints/kitti/sparseconv_masked_maeloss)
+sh scripts/test.sh ./checkpoints/kitti/sparseconv_masked_maeloss 0 sparseconv
 ```
 
 ## Experiments
