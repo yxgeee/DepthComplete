@@ -35,7 +35,6 @@ parser.add_argument('resume', type=str, metavar='PATH',
 parser.add_argument('--dataset', default='kitti', choices=datasets.get_names(),
                     help='name of dataset')
 parser.add_argument('--data-root', default='./data', help='root path to datasets')
-parser.add_argument('--save-root', default='./checkpoints', help='root path to datasets')
 parser.add_argument('--arch', '-a', metavar='ARCH', default='sparseconv',
                     choices=models.get_names(),
                     help='model architecture: ' +
@@ -52,9 +51,12 @@ def main():
     os.environ['CUDA_VISIBLE_DEVICES'] = args.gpu_ids
     cudnn.benchmark = True
 
-    args.save_root = osp.join(args.save_root, args.dataset, args.tag, 'results')
-    if not osp.isdir(args.save_root):
-        os.mkdir(args.save_root)
+    args.resume = osp.join(args.resume, 'best_model.pth.tar')
+
+    save_root = osp.join(osp.dirname(resume), 'results')
+    # args.save_root = osp.join(args.save_root, args.dataset, args.tag, 'results')
+    if not osp.isdir(save_root):
+        os.makedirs(save_root)
     print("==========\nArgs:{}\n==========".format(args))
 
     # create model
@@ -87,7 +89,7 @@ def main():
             input = torch.unsqueeze(raw,0).cuda()
             output = model(input) * 256.
             pil_img = to_pil(output[0].cpu().int())
-            pil_img.save(osp.join(args.save_root, osp.basename(img)))
+            pil_img.save(osp.join(save_root, osp.basename(img)))
             print(img+' finish.')
 
 if __name__ == '__main__':
