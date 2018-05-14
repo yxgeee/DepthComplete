@@ -36,18 +36,6 @@ sh scripts/train.sh
 ```
 
 ## Experiments
-#### SparseConv with masked-maeloss
-```
-mean mae: 0.508195 
-mean rmse: 1.730340 
-mean inverse mae: 0.002170 
-mean inverse rmse: 0.006691 
-mean log mae: 0.027238 
-mean log rmse: 0.079132 
-mean scale invariant log: 0.078568 
-mean abs relative: 0.030776 
-mean squared relative: 0.016117 
-```
-|    method    |  MAE  |  RMSE  |
-| :----------- | :---: | :----: |
-| SparseConv   | 0.508195  | 1.730340   |
+|    Method    |  MAE  |  RMSE  |  iMAE  |  iRMSE  | 
+| :----------- | :---: | :----: | :----: | :-----: |
+| SparseConv   | 0.508195  | 1.730340   |  0.002170 | 0.006691 |
