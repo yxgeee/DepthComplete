@@ -40,12 +40,14 @@ class DepthDataset(Dataset):
             gt = TF.rotate(raw, angle, resample=Image.NEAREST)
 
         # Random crop
-        i, j, h, w = T.RandomCrop.get_params(
-            raw, output_size=(self.height, self.width))
-        if self.isVal:
-            i, j = 0, 0
-        raw = TF.crop(raw, i, j, h, w)
-        gt = TF.crop(gt, i, j, h, w)
+        if not self.isVal:
+            i, j, h, w = T.RandomCrop.get_params(
+                raw, output_size=(self.height, self.width))
+            raw = TF.crop(raw, i, j, h, w)
+            gt = TF.crop(gt, i, j, h, w)
+        else:
+            raw = TF.center_crop(raw, (self.height, self.width))
+            gt = TF.center_crop(gt, (self.height, self.width))
 
         # Random horizontal flipping
         if random.random() > 0.5 and not self.isVal:

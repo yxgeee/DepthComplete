@@ -133,7 +133,7 @@ def main():
 
     # Data loading code
     train_dataset = DepthDataset(osp.join(args.data_root,args.dataset), dataset.trainset, args.height, args.width)
-    val_dataset = DepthDataset(osp.join(args.data_root,args.dataset), dataset.valset, args.height, args.width, isVal=True)
+    val_dataset = DepthDataset(osp.join(args.data_root,args.dataset), dataset.valset, 352, 1216, isVal=True)
 
     train_loader = torch.utils.data.DataLoader(
         train_dataset, batch_size=args.batch_size, shuffle=True,
