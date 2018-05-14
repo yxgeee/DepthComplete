@@ -50,4 +50,4 @@ mean squared relative: 0.016117
 ```
 |    method    |  MAE  |  RMSE  |
 | :----------- | :---: | :----: |
-| SparseConv   | 0.51  | 1.73   |
+| SparseConv   | 0.508195  | 1.730340   |
