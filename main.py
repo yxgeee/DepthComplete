@@ -55,6 +55,7 @@ parser.add_argument('--criterion', default='masked_mseloss', choices=get_criteri
 parser.add_argument('--gamma', default=0.1, type=float, help="learning rate decay")
 parser.add_argument('-b', '--batch-size', default=64, type=int,
                     metavar='N', help='mini-batch size (default: 64)')
+parser.add_argument('--optim', default='adam', type=str)
 parser.add_argument('--lr', '--learning-rate', default=0.1, type=float,
                     metavar='LR', help='initial learning rate')
 parser.add_argument('--momentum', default=0.9, type=float, metavar='M',
@@ -69,6 +70,15 @@ parser.add_argument('-e', '--evaluate', dest='evaluate', action='store_true',
                     help='evaluate model on validation set')
 parser.add_argument('--gpu-ids', default='0', type=str, help='gpu device ids for CUDA_VISIBLE_DEVICES')
 
+def init_optim(optim, params, lr, weight_decay):
+    if optim == 'adam':
+        return torch.optim.Adam(params, lr=lr, weight_decay=weight_decay)
+    elif optim == 'sgd':
+        return torch.optim.SGD(params, lr=lr, momentum=0.9, weight_decay=weight_decay)
+    elif optim == 'rmsprop':
+        return torch.optim.RMSprop(params, lr=lr, momentum=0.9, weight_decay=weight_decay)
+    else:
+        raise KeyError("Unsupported optim: {}".format(optim))
 
 def main():
     global args
@@ -97,10 +107,8 @@ def main():
     model = models.init_model(name=args.arch)
     print("Model size: {:.5f}M".format(sum(p.numel() for p in model.parameters())/1000000.0))
     # optionally resume from a checkpoint
-    # optimizer = torch.optim.Adam(model.parameters(), args.lr)
-    optimizer = torch.optim.SGD(model.parameters(), args.lr,
-                                momentum=args.momentum,
-                                weight_decay=args.weight_decay)
+    optimizer = init_optim(args.optim, model.parameters(), args.lr, args.weight_decay)
+
     if args.resume:
         if os.path.isfile(args.resume):
             print("=> loading checkpoint '{}'".format(args.resume))

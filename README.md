@@ -7,11 +7,11 @@
 ## Support
 - [Kitti](http://www.cvlibs.net/datasets/kitti/index.php) depth dataset
 - SparseConv structure released by [Sparsity Invariant CNNs](http://arxiv.org/abs/1708.06500)
+- Sparse-to-dense structure released by [Sparse-to-Dense: Depth Prediction from Sparse Depth Samples and a Single Image](https://arxiv.org/pdf/1709.07492.pdf)
 
 ## TODO
 - SparseConv baseline model training and evaluation, compared with different losses and optimization schedulers.
 - Data augmentation rules. (generate sparse data, crop size)
-- Sparse-to-dense structure.
 - SparseConv based residual structure, u-net struture, etc.
 - Crf
 
@@ -36,3 +36,18 @@ sh scripts/train.sh
 ```
 
 ## Experiments
+#### SparseConv with masked-maeloss
+```
+mean mae: 0.508195 
+mean rmse: 1.730340 
+mean inverse mae: 0.002170 
+mean inverse rmse: 0.006691 
+mean log mae: 0.027238 
+mean log rmse: 0.079132 
+mean scale invariant log: 0.078568 
+mean abs relative: 0.030776 
+mean squared relative: 0.016117 
+```
+|    method    |  MAE  |  RMSE  |
+| :----------- | :---: | :----: |
+| SparseConv   | 0.51  | 1.73   |
