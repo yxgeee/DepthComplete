@@ -34,6 +34,7 @@ class MaskedLogMSELoss(nn.Module):
     def forward(self, pred, target):
         assert pred.dim() == target.dim(), "inconsistent dimensions"
         valid_mask = (target>0).detach()
+        pred[pred<0] = 0
         diff = torch.log(target+1e-6) - torch.log(pred+1e-6)
         diff = diff[valid_mask]
         self.loss = (diff ** 2).mean()
@@ -46,6 +47,7 @@ class MaskedLogMAELoss(nn.Module):
     def forward(self, pred, target):
         assert pred.dim() == target.dim(), "inconsistent dimensions"
         valid_mask = (target>0).detach()
+        pred[pred<0] = 0
         diff = torch.log(target+1e-6) - torch.log(pred+1e-6)
         diff = diff[valid_mask]
         self.loss = diff.abs().mean()

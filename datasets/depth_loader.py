@@ -11,6 +11,8 @@ from torch.utils.data import Dataset
 import torchvision.transforms as T
 import torchvision.transforms.functional as TF
 
+from util.utils import dense_to_sparse
+
 def depth_transform(pil_img):
     depth_png = np.array(pil_img, dtype=int)[:,:,np.newaxis]
     # make sure we have a proper 16bit depth map here.. not 8bit!
@@ -66,17 +68,15 @@ class DepthDataset(Dataset):
         raw = depth_transform(raw_pil)
         gt = depth_transform(gt_pil)
 
-        # scale to [0,1]
-        # scale = raw.max()
         scale = 1
         if not self.isVal:
             scale = random.uniform(1,1.5)
-        gt_s = gt / scale
-        raw_s = raw / scale
-        gt_s[gt<0] = -1
-        raw_s[raw<0] = -1
+            gt_s = gt / scale
+            raw_s = raw / scale
+            gt_s[gt<0] = -1
+            raw_s[raw<0] = -1
 
         raw_s = self.totensor(raw_s).float()
         gt_s = self.totensor(gt_s).float()
 
-        return raw_s, gt_s, scale*256.
+        return raw_s, gt_s, scale

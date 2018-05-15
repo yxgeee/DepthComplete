@@ -133,7 +133,7 @@ def main():
 
     # Data loading code
     train_dataset = DepthDataset(osp.join(args.data_root,args.dataset), dataset.trainset, args.height, args.width)
-    val_dataset = DepthDataset(osp.join(args.data_root,args.dataset), dataset.valset, 352, 1216, isVal=True)
+    val_dataset = DepthDataset(osp.join(args.data_root,args.dataset), dataset.valset_select, 352, 1216, isVal=True)
 
     train_loader = torch.utils.data.DataLoader(
         train_dataset, batch_size=args.batch_size, shuffle=True,
@@ -199,7 +199,9 @@ def train(train_loader, model, optimizer, criterion, epoch):
         output = output * scale.view(input.size(0),1,1,1).expand_as(output)
         target = target * scale.view(input.size(0),1,1,1).expand_as(target)
         results.evaluate(output, target)
-        rmses.update(results.rmse, input.size(0))
+        rmses.update(results.rmse, results.num)
+        output = output * 256.
+        target = target * 256.
         # measure elapsed time
         batch_time.update(time.time() - end)
         end = time.time()
@@ -222,18 +224,20 @@ def validate(val_loader, model, criterion):
 
     with torch.no_grad():
         end = time.time()
-        for i, (input, target, scale) in enumerate(val_loader):
-            input, target, scale = input.cuda(), target.cuda(), scale.float().cuda()
+        for i, (input, target, _) in enumerate(val_loader):
+            input, target = input.cuda(), target.cuda()
 
             # compute output
             output = model(input)
             loss = criterion(output, target)
             # measure accuracy and record loss
             losses.update(loss.item(), input.size(0))
-            output = output * scale.view(input.size(0),1,1,1).expand_as(output)
-            target = target * scale.view(input.size(0),1,1,1).expand_as(target)
+            # output = output * scale.view(input.size(0),1,1,1).expand_as(output)
+            # target = target * scale.view(input.size(0),1,1,1).expand_as(target)
             results.evaluate(output, target)
-            rmses.update(results.rmse, input.size(0))
+            rmses.update(results.rmse, results.num)
+            output = output * 256.
+            target = target * 256.
 
             # measure elapsed time
             batch_time.update(time.time() - end)

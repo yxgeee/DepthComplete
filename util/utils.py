@@ -7,6 +7,7 @@ import json
 import math
 import os.path as osp
 import matplotlib.pyplot as plt
+import numpy as np
 
 import torch
 
@@ -93,6 +94,7 @@ class Evaluate(object):
         self.rmse, self.mae = 0, 0
         self.log_rmse, self.log_mae = 0, 0
         self.absrel, self.sqrel = 0, 0
+        self.num = 0
 
     def pipline(self):
         return self.rmse
@@ -106,6 +108,7 @@ class Evaluate(object):
 
     def evaluate(self, output, target):
         valid_mask = (target>0).detach()
+        self.num = valid_mask.sum().item()
         output = output[valid_mask]
         target = target[valid_mask]
 
@@ -133,3 +136,9 @@ def colored_depthmap(depth, d_min=None, d_max=None):
         d_max = np.max(depth)
     depth_relative = (depth - d_min) / (d_max - d_min)
     return 255 * cmap(depth_relative)[:,:,:3] # H, W, C
+
+def dense_to_sparse(depth, num_samples):
+    mask_keep = depth > 0
+    n_keep = np.count_nonzero(mask_keep)
+    prob = float(self.num_samples) / n_keep
+    return np.bitwise_and(mask_keep, np.random.uniform(0, 1, depth.shape) < prob)
