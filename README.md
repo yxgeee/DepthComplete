@@ -14,6 +14,7 @@
 - Data augmentation rules. (generate sparse data, crop size)
 - SparseConv based residual structure, u-net structure, etc.
 - Crf post-process or end-to-end training
+- RGB guided
 
 ## How to use
 
@@ -40,7 +41,8 @@ sh scripts/test.sh ./checkpoints/kitti/sparseconv_masked_maeloss 0 sparseconv
 ```
 
 ## Experiments
-|    Method                 |    MAE   |  RMSE    |  iMAE    |  iRMSE   | 
-| :------------------------ | :------: | :------: | :------: | :------: |
-| SparseConv(maeloss)       | 0.462935 | 1.731169 | 0.001959 | 0.006377 |
-| SparseConv(log_maeloss)   | 0.479404 | 1.738473 | 0.002044 | 0.006431 |
+### evaluate on kitti validate set
+|    Method                 |    MAE   |  RMSE    |  iMAE    |  iRMSE   |   script     |
+| :------------------------ | :------: | :------: | :------: | :------: | :----------- |
+| SparseConv(maeloss)       | 0.462935 | 1.731169 | 0.001959 | 0.006377 | python main.py --gpu-ids 0,1,2 -a sparseconv -b 32 --epochs 20 --step-size 0 --eval-step 1 --lr 0.001 --criterion masked_maeloss --optim adam |
+| SparseConv(log_maeloss)   | 0.479404 | 1.738473 | 0.002044 | 0.006431 | python main.py --gpu-ids 0,1,2 -a sparseconv -b 32 --epochs 20 --step-size 0 --eval-step 1 --lr 0.001 --criterion masked_log_maeloss --optim adam |
