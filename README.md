@@ -10,8 +10,7 @@
 - Sparse-to-dense structure released by [Sparse-to-Dense: Depth Prediction from Sparse Depth Samples and a Single Image](https://arxiv.org/pdf/1709.07492.pdf)
 
 ## TODO
-- SparseConv baseline model training and evaluation, compared with different losses and optimization schedulers.
-- Data augmentation rules. (generate sparse data, crop size)
+- Data augmentation rules. (generate sparse data, etc.)
 - SparseConv based residual structure, u-net structure, etc.
 - Crf post-process or end-to-end training
 - RGB guided
@@ -41,8 +40,8 @@ sh scripts/test.sh ./checkpoints/kitti/sparseconv_masked_maeloss 0 sparseconv
 ```
 
 ## Experiments
-### evaluate on kitti validate set
-|    Method                 |    MAE   |  RMSE    |  iMAE    |  iRMSE   |   script     |
+### Evaluate on [Kitti](http://www.cvlibs.net/datasets/kitti/eval_depth.php?benchmark=depth_completion) selected val set
+|    Method                 |    MAE   |  RMSE    |  iMAE    |  iRMSE   |   Script     |
 | :------------------------ | :------: | :------: | :------: | :------: | :----------- |
 | SparseConv(maeloss)       | 0.462935 | 1.731169 | 0.001959 | 0.006377 | python main.py --gpu-ids 0,1,2 -a sparseconv -b 32 --epochs 20 --step-size 0 --eval-step 1 --lr 0.001 --criterion masked_maeloss --optim adam |
 | SparseConv(log_maeloss)   | 0.479404 | 1.738473 | 0.002044 | 0.006431 | python main.py --gpu-ids 0,1,2 -a sparseconv -b 32 --epochs 20 --step-size 0 --eval-step 1 --lr 0.001 --criterion masked_log_maeloss --optim adam |

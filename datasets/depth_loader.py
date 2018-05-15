@@ -34,27 +34,27 @@ class DepthDataset(Dataset):
     def __len__(self):
         return len(self.dataset['raw'])
 
-    def transform(self, raw, gt):
+    def transform_train(self, raw, gt):
         # Random rotate
-        if not self.isVal:
-            angle = np.random.uniform(-5.0, 5.0)
-            raw = TF.rotate(raw, angle, resample=Image.NEAREST)
-            gt = TF.rotate(raw, angle, resample=Image.NEAREST)
+        angle = np.random.uniform(-5.0, 5.0)
+        raw = TF.rotate(raw, angle, resample=Image.NEAREST)
+        gt = TF.rotate(raw, angle, resample=Image.NEAREST)
 
         # Random crop
-        if not self.isVal:
-            i, j, h, w = T.RandomCrop.get_params(
-                raw, output_size=(self.height, self.width))
-            raw = TF.crop(raw, i, j, h, w)
-            gt = TF.crop(gt, i, j, h, w)
-        else:
-            raw = TF.center_crop(raw, (self.height, self.width))
-            gt = TF.center_crop(gt, (self.height, self.width))
+        i, j, h, w = T.RandomCrop.get_params(
+            raw, output_size=(self.height, self.width))
+        raw = TF.crop(raw, i, j, h, w)
+        gt = TF.crop(gt, i, j, h, w)
 
         # Random horizontal flipping
-        if random.random() > 0.5 and not self.isVal:
+        if random.random() > 0.5:
             raw = TF.hflip(raw)
             gt = TF.hflip(gt)
+        return raw, gt
+
+    def transform_val(self, raw, gt):
+        raw = TF.center_crop(raw, (self.height, self.width))
+        gt = TF.center_crop(gt, (self.height, self.width))
         return raw, gt
 
     def __getitem__(self, index):
@@ -63,7 +63,10 @@ class DepthDataset(Dataset):
 
         raw_pil = Image.open(raw_path)
         gt_pil = Image.open(gt_path)
-        raw_pil, gt_pil = self.transform(raw_pil, gt_pil)
+        if not self.isVal:
+            raw_pil, gt_pil = self.transform_train(raw_pil, gt_pil)
+        else:
+            raw_pil, gt_pil = self.transform_val(raw_pil, gt_pil)
 
         raw = depth_transform(raw_pil)
         gt = depth_transform(gt_pil)

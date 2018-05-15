@@ -133,13 +133,17 @@ def main():
 
     # Data loading code
     train_dataset = DepthDataset(osp.join(args.data_root,args.dataset), dataset.trainset, args.height, args.width)
-    val_dataset = DepthDataset(osp.join(args.data_root,args.dataset), dataset.valset_select, 352, 1216, isVal=True)
+    val_dataset = DepthDataset(osp.join(args.data_root,args.dataset), dataset.valset, 352, 1216, isVal=True)
+    val_select_dataset = DepthDataset(osp.join(args.data_root,args.dataset), dataset.valset_select, 352, 1216, isVal=True)
 
     train_loader = torch.utils.data.DataLoader(
         train_dataset, batch_size=args.batch_size, shuffle=True,
         num_workers=args.workers, pin_memory=True)
     val_loader = torch.utils.data.DataLoader(
         val_dataset, batch_size=args.batch_size, shuffle=False,
+        num_workers=args.workers, pin_memory=True)
+    val_select_loader = torch.utils.data.DataLoader(
+        val_select_dataset, batch_size=args.batch_size, shuffle=False,
         num_workers=args.workers, pin_memory=True)
 
     if args.evaluate:
@@ -158,6 +162,8 @@ def main():
         if args.eval_step > 0 and (epoch+1) % args.eval_step == 0 or (epoch+1) == args.epochs:
             print("==> Test")
             rmse = validate(val_loader, model, criterion)
+            rmse_select = validate(val_select_loader, model, criterion)
+            print(' * RMSE {rmse:.6f}\t RMSE_select {rmse_select:.6f}'.format(rmse=rmse, rmse_select=rmse_select))
 
             is_best = rmse < best_pipline
             if is_best:
@@ -250,8 +256,6 @@ def validate(val_loader, model, criterion):
                       'RMSE {rmse.val:.6f} ({rmse.avg:.6f})'.format(
                        i, len(val_loader), batch_time=batch_time,
                        loss=losses, rmse=rmses))
-
-        print(' * RMSE {rmse.avg:.6f}'.format(rmse=rmses))
 
     return rmses.avg
 
