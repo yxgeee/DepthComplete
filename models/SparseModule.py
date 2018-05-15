@@ -13,13 +13,9 @@ class SparseConv(nn.Module):
 		self.if_bias = bias
 		if self.if_bias:
 			self.bias = nn.Parameter(torch.zeros(out_channels).float(), requires_grad=True)
-		self.conv_mask = nn.Conv2d(in_channels, out_channels, kernel_size, stride=stride, padding=padding, dilation=dilation, bias=True)
 		self.pool = nn.MaxPool2d(kernel_size, stride=stride, padding=padding, dilation=dilation)
 
-		nn.init.normal_(self.conv.weight, 0.0, 0.02)
-		nn.init.constant_(self.conv_mask.weight, 1)
-		nn.init.constant_(self.conv_mask.bias, 1e-5)
-		self.conv_mask.require_grad = False
+		nn.init.kaiming_normal_(self.conv.weight, mode='fan_out', nonlinearity='relu')
 		self.pool.require_grad = False
 
 	def forward(self, input):
@@ -27,7 +23,11 @@ class SparseConv(nn.Module):
 		mc = m.expand_as(x)
 		x = x * mc
 		x = self.conv(x)
-		mc = 1. / self.conv_mask(mc)
+
+		weights = torch.ones_like(self.conv.weight)
+		mc = F.conv2d(mc, weights, bias=None, stride=self.conv.stride, padding=self.conv.padding, dilation=self.conv.dilation)
+		mc = torch.clamp(mc, min=1e-5)
+		mc = 1. / mc
 		x = x * mc
 		if self.if_bias:
 			x = x + self.bias.view(1, self.bias.size(0), 1, 1).expand_as(x)

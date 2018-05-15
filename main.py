@@ -90,10 +90,10 @@ def main():
     cudnn.benchmark = True
 
     if args.tag:
-        save_name = args.arch+'_'+args.criterion + '_'+args.tag
+        save_name = args.criterion + '_'+args.tag
     else:
-        save_name = args.arch+'_'+args.criterion
-    args.save_root = osp.join(args.save_root, args.dataset, save_name)
+        save_name = args.criterion
+    args.save_root = osp.join(args.save_root, args.dataset, args.arch, save_name)
     if not args.evaluate:
         sys.stdout = Logger(osp.join(args.save_root, 'log_train.txt'))
     else:
@@ -133,12 +133,12 @@ def main():
 
     # Data loading code
     train_dataset = DepthDataset(osp.join(args.data_root,args.dataset), dataset.trainset, args.height, args.width)
-    val_dataset = DepthDataset(osp.join(args.data_root,args.dataset), dataset.valset, 352, 1216, isVal=True)
-    val_select_dataset = DepthDataset(osp.join(args.data_root,args.dataset), dataset.valset_select, 352, 1216, isVal=True)
+    val_dataset = DepthDataset(osp.join(args.data_root,args.dataset), dataset.valset, args.height, args.width, isVal=True)
+    val_select_dataset = DepthDataset(osp.join(args.data_root,args.dataset), dataset.valset_select, isVal=True)
 
     train_loader = torch.utils.data.DataLoader(
         train_dataset, batch_size=args.batch_size, shuffle=True,
-        num_workers=args.workers, pin_memory=True)
+        num_workers=args.workers, pin_memory=True, drop_last=True)
     val_loader = torch.utils.data.DataLoader(
         val_dataset, batch_size=args.batch_size, shuffle=False,
         num_workers=args.workers, pin_memory=True)
@@ -148,7 +148,9 @@ def main():
 
     if args.evaluate:
         print("Evaluate only")
-        validate(val_loader, model, criterion)
+        rmse = validate(val_loader, model, criterion)
+        rmse_select = validate(val_select_loader, model, criterion)
+        print(' * RMSE {rmse:.6f}\t RMSE_select {rmse_select:.6f}'.format(rmse=rmse, rmse_select=rmse_select))
         return
 
     print("==> Start training")
@@ -206,9 +208,8 @@ def train(train_loader, model, optimizer, criterion, epoch):
         target = target * scale.view(input.size(0),1,1,1).expand_as(target)
         results.evaluate(output, target)
         rmses.update(results.rmse, results.num)
-        output = output * 256.
-        target = target * 256.
-        # measure elapsed time
+        # output = output * 256.
+        # target = target * 256.
         batch_time.update(time.time() - end)
         end = time.time()
 
@@ -238,14 +239,11 @@ def validate(val_loader, model, criterion):
             loss = criterion(output, target)
             # measure accuracy and record loss
             losses.update(loss.item(), input.size(0))
-            # output = output * scale.view(input.size(0),1,1,1).expand_as(output)
-            # target = target * scale.view(input.size(0),1,1,1).expand_as(target)
             results.evaluate(output, target)
             rmses.update(results.rmse, results.num)
-            output = output * 256.
-            target = target * 256.
+            # output = output * 256.
+            # target = target * 256.
 
-            # measure elapsed time
             batch_time.update(time.time() - end)
             end = time.time()
 

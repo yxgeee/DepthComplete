@@ -22,7 +22,7 @@ def depth_transform(pil_img):
     return depth
 
 class DepthDataset(Dataset):
-    def __init__(self, root, dataset, height, width, isVal=False):
+    def __init__(self, root, dataset, height=None, width=None, isVal=False):
         self.root = root
         self.dataset = dataset
         self.height = height
@@ -66,7 +66,8 @@ class DepthDataset(Dataset):
         if not self.isVal:
             raw_pil, gt_pil = self.transform_train(raw_pil, gt_pil)
         else:
-            raw_pil, gt_pil = self.transform_val(raw_pil, gt_pil)
+            if self.height!=None and self.width!=None:
+                raw_pil, gt_pil = self.transform_val(raw_pil, gt_pil)
 
         raw = depth_transform(raw_pil)
         gt = depth_transform(gt_pil)
