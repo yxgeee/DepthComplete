@@ -34,7 +34,7 @@ class MaskedLogMSELoss(nn.Module):
     def forward(self, pred, target):
         assert pred.dim() == target.dim(), "inconsistent dimensions"
         valid_mask = (target>0).detach()
-        pred[pred<0] = 0
+        pred = torch.clamp(pred, min=0)
         diff = torch.log(target+1e-6) - torch.log(pred+1e-6)
         diff = diff[valid_mask]
         self.loss = (diff ** 2).mean()
@@ -47,10 +47,22 @@ class MaskedLogMAELoss(nn.Module):
     def forward(self, pred, target):
         assert pred.dim() == target.dim(), "inconsistent dimensions"
         valid_mask = (target>0).detach()
-        pred[pred<0] = 0
+        pred = torch.clamp(pred, min=0)
         diff = torch.log(target+1e-6) - torch.log(pred+1e-6)
         diff = diff[valid_mask]
         self.loss = diff.abs().mean()
+        return self.loss
+
+class MaskedEuclideanLoss(nn.Module):
+    def __init__(self):
+        super(MaskedEuclideanLoss, self).__init__()
+
+    def forward(self, pred, target):
+        assert pred.dim() == target.dim(), "inconsistent dimensions"
+        valid_mask = (target>0).detach()
+        diff = target - pred
+        diff = diff[valid_mask].abs()
+        self.loss = torch.pow(torch.norm(diff, p=2),2) / valid_mask.sum().item() / 2
         return self.loss
 
 class BerHuLoss(nn.Module):
@@ -79,6 +91,7 @@ __factory = {
     'masked_log_mseloss': MaskedLogMSELoss,
     'masked_log_maeloss': MaskedLogMAELoss,
     'berhuloss': BerHuLoss,
+    'masked_euclideanloss': MaskedEuclideanLoss,
 }
 
 def get_criterions():
