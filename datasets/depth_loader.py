@@ -71,12 +71,12 @@ class DepthDataset(Dataset):
         scale = 1
         if not self.isVal:
             scale = random.uniform(1,1.5)
-            gt_s = gt / scale
-            raw_s = raw / scale
-            gt_s[gt<0] = -1
-            raw_s[raw<0] = -1
+            gt = gt / scale
+            raw = raw / scale
+            gt[gt<0] = -1
+            raw[raw<0] = -1
 
-        raw_s = self.totensor(raw_s).float()
-        gt_s = self.totensor(gt_s).float()
+        raw = self.totensor(raw).float()
+        gt = self.totensor(gt).float()
 
-        return raw_s, gt_s, scale
+        return raw, gt, scale
