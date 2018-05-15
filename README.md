@@ -8,10 +8,11 @@
 - [Kitti](http://www.cvlibs.net/datasets/kitti/eval_depth.php?benchmark=depth_completion) depth complete dataset
 - SparseConv structure released by [Sparsity Invariant CNNs](http://arxiv.org/abs/1708.06500)
 - Sparse-to-dense structure released by [Sparse-to-Dense: Depth Prediction from Sparse Depth Samples and a Single Image](https://arxiv.org/pdf/1709.07492.pdf)
+- Partial Convolution based U-Net structure released by [Image Inpainting for Irregular Holes Using Partial Convolutions](http://arxiv.org/abs/1804.07723)
 
 ## TODO
-- Data augmentation rules. (generate sparse data, etc.)
-- SparseConv based residual structure, u-net structure, etc.
+- train and evaluate three structures
+- generate sparse data by random sample augmentation
 - Crf post-process or end-to-end training
 - RGB guided
 
