@@ -155,7 +155,7 @@ def choose_decoder(decoder, in_channels):
 
 
 class StoDResNet(nn.Module):
-    def __init__(self, layers=18, decoder='upproj', in_channels=1, out_channels=1, pretrained=True):
+    def __init__(self, layers=18, decoder='upproj', in_channels=2, out_channels=1, pretrained=True):
 
         if layers not in [18, 34, 50, 101, 152]:
             raise RuntimeError('Only 18, 34, 50, 101, and 152 layer model are defined for ResNet. Got {}'.format(layers))
@@ -203,8 +203,10 @@ class StoDResNet(nn.Module):
         self.conv3.apply(weights_init)
 
     def forward(self, x):
+        m = (x>0).detach().float()
         height = x.size(2)
         width = x.size(3)
+        x = torch.cat((x,m),dim=1)
         # resnet
         x = self.conv1(x)
         x = self.bn1(x)
