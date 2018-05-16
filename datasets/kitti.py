@@ -23,7 +23,7 @@ class Kitti(object):
 		self.valset = {'raw':imgset['val_raw'], 'gt':imgset['val_gt']}
 		self.valset_select = {'raw':imgset['val_selected_raw'], 'gt':imgset['val_selected_gt']}
 		self.testset = {'raw':imgset['test_raw']}
-        
+
 	def _generate_list(self, split):
 		raw = []
 		gt = []
@@ -38,7 +38,7 @@ class Kitti(object):
 
 	def _generate_list_selected(self, split):
 		raw = []
-		for imgs in os.listdir(osp.join(self.root, split)):
+		for imgs in sorted(os.listdir(osp.join(self.root, split))):
 			raw.append(osp.join(split,imgs))
 		return raw
 

@@ -58,8 +58,6 @@ def main():
     if not osp.isdir(save_root):
         os.makedirs(save_root)
     print("==========\nArgs:{}\n==========".format(args))
-    import pdb
-    pdb.set_trace()
     # create model
     print("=> creating model '{}'".format(args.arch))
     model = models.init_model(name=args.arch)
@@ -80,6 +78,7 @@ def main():
 
     to_pil = T.ToPILImage()
 
+    model.eval()
     print("===> Start testing")
     with torch.no_grad():
         for img in dataset.valset_select['raw']:
