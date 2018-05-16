@@ -89,7 +89,7 @@ def main():
             valid_mask = (raw>0).detach().float()
 
             input = torch.unsqueeze(raw,0).cuda()
-            output = torch.clamp(model(input),min=0, max=65536)
+            output = torch.clamp(model(input),min=0, max=255)
             output = output * 256.
             raw = raw * 256.
 

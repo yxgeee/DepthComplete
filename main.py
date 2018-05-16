@@ -236,6 +236,7 @@ def validate(val_loader, model, criterion):
 
             # compute output
             output = model(input)
+            output = torch.clamp(output, min=0, max=255)
             loss = criterion(output, target)
             # measure accuracy and record loss
             losses.update(loss.item(), input.size(0))
