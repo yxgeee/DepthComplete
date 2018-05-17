@@ -45,4 +45,4 @@ sh scripts/test.sh ./checkpoints/kitti/sparseconv_masked_maeloss 0 sparseconv
 |    Method                 | loss   |   MAE    |  RMSE    |  iMAE    |  iRMSE   |   Script     |
 | :------------------------ | :----: | :------: | :------: | :------: | :------: | :----------- |
 | SparseConv                | mae    | 0.484260 | 1.777299 | 0.001947 | 0.006476 |              |
-| SparsetoDense(d)          | mae    | 0.447418 | 1.687465 | 0.001873 | 0.006004 |              |
+| SparsetoDense(d)          | mae    | 0.425472 | 1.670506 | 0.001736 | 0.005809 |              |
