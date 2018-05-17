@@ -6,6 +6,10 @@ import torchvision.models
 import collections
 import math
 
+##########################################################################################
+# code from https://github.com/fangchangma/sparse-to-dense.pytorch/blob/master/models.py #
+##########################################################################################
+
 class Unpool(nn.Module):
     # Unpool: 2*2 unpooling with zero padding
     def __init__(self, num_channels, stride=2):

@@ -233,9 +233,11 @@ def validate(val_loader, model, criterion):
         end = time.time()
         for i, (input, target, _) in enumerate(val_loader):
             input, target = input.cuda(), target.cuda()
+            valid_mask = (input>0).detach().float()
 
             # compute output
             output = model(input)
+            output = input*valid_mask + output*(1-valid_mask)
             output = torch.clamp(output, min=0, max=255)
             loss = criterion(output, target)
             # measure accuracy and record loss
