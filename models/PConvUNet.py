@@ -81,19 +81,23 @@ class PConvDecoder(nn.Module):
 		return x, m
 
 class UNet(nn.Module):
+	# In order to use Batch Normalization in the presence of holes, 
+	# we first turn on Batch Normalization for the initial training using a learning rate of 0.0002. 
+	# Then, we fine-tune using a learning rate of 0.00005 and freeze the Batch Normalization parameters in the encoder part of the network. 
+	# We keep Batch Normalization enabled in the decoder. 
 
 	def __init__(self, in_channel=1, out_channel=1):
 		super(UNet, self).__init__()
 		self.down1 = PConvEncoder(in_channel, 64, 11, stride=2, padding=5, bn=False)
-		self.down2 = PConvEncoder(64, 128, 7, stride=2, padding=3, bn=True)
-		self.down3 = PConvEncoder(128, 256, 5, stride=2, padding=2, bn=True)
-		self.down4 = PConvEncoder(256, 512, 3, stride=2, padding=1, bn=True)
-		self.down5 = PConvEncoder(512, 512, 3, stride=2, padding=1, bn=True)
+		self.down2 = PConvEncoder(64, 128, 7, stride=2, padding=3, bn=False)
+		self.down3 = PConvEncoder(128, 256, 5, stride=2, padding=2, bn=False)
+		self.down4 = PConvEncoder(256, 512, 3, stride=2, padding=1, bn=False)
+		self.down5 = PConvEncoder(512, 512, 3, stride=2, padding=1, bn=False)
 		
-		self.up1 = PConvDecoder(512+512, 512, 3, stride=1, padding=1, bn=True)
-		self.up2 = PConvDecoder(512+256, 256, 3, stride=1, padding=1, bn=True)
-		self.up3 = PConvDecoder(256+128, 128, 3, stride=1, padding=1, bn=True)
-		self.up4 = PConvDecoder(128+64, 64, 3, stride=1, padding=1, bn=True)
+		self.up1 = PConvDecoder(512+512, 512, 3, stride=1, padding=1, bn=False)
+		self.up2 = PConvDecoder(512+256, 256, 3, stride=1, padding=1, bn=False)
+		self.up3 = PConvDecoder(256+128, 128, 3, stride=1, padding=1, bn=False)
+		self.up4 = PConvDecoder(128+64, 64, 3, stride=1, padding=1, bn=False)
 		self.up5 = PConvDecoder(64+in_channel, out_channel, 3, stride=1, padding=1, bn=False, nonlinear=False)
 
 		for m in self.modules():

@@ -11,7 +11,7 @@
 - Partial Convolution based U-Net structure released by [Image Inpainting for Irregular Holes Using Partial Convolutions](http://arxiv.org/abs/1804.07723)
 
 ## TODO
-- train and evaluate three structures
+- train U-net
 - generate sparse data by random sample augmentation
 - Crf post-process or end-to-end training
 - RGB guided
