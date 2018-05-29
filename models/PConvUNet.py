@@ -24,12 +24,12 @@ class PConv(nn.Module):
 
 		weights = torch.ones_like(self.conv.weight)
 		m = F.conv2d(m, weights, bias=None, stride=self.conv.stride, padding=self.conv.padding, dilation=self.conv.dilation)
+		mask = (m>0).float()
 		m = torch.clamp(m, min=1e-5)
-
-		x = x * (1. / m)
+		x = x * (1. / m) * mask
 		if self.if_bias:
 			x = x + self.bias.view(1, self.bias.size(0), 1, 1).expand_as(x)
-		m = (m>1e-5).float()
+		m = mask
 		return x, m
 
 class PConvEncoder(nn.Module):
@@ -88,8 +88,8 @@ class UNet(nn.Module):
 
 	def __init__(self, in_channel=1, out_channel=1):
 		super(UNet, self).__init__()
-		self.down1 = PConvEncoder(in_channel, 64, 11, stride=2, padding=5, bn=False)
-		self.down2 = PConvEncoder(64, 128, 7, stride=2, padding=3, bn=False)
+		self.down1 = PConvEncoder(in_channel, 64, 7, stride=2, padding=3, bn=False)
+		self.down2 = PConvEncoder(64, 128, 5, stride=2, padding=2, bn=False)
 		self.down3 = PConvEncoder(128, 256, 5, stride=2, padding=2, bn=False)
 		self.down4 = PConvEncoder(256, 512, 3, stride=2, padding=1, bn=False)
 		self.down5 = PConvEncoder(512, 512, 3, stride=2, padding=1, bn=False)
