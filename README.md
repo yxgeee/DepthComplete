@@ -13,7 +13,7 @@
 
 ### Download the code
 ```
-git clone -b release http://path/to/this/repository/
+git clone -b release https://github.com/yxgeee/DepthComplete.git
 ```
 
 ### Prepare the data
