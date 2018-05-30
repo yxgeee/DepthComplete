@@ -7,7 +7,7 @@
 ## Support
 - [Kitti](http://www.cvlibs.net/datasets/kitti/eval_depth.php?benchmark=depth_completion) depth complete dataset
 - SparseConv structure released by [Sparsity Invariant CNNs](http://arxiv.org/abs/1708.06500)
-- Sparse-to-dense structure released by [Sparse-to-Dense: Depth Prediction from Sparse Depth Samples and a Single Image](https://arxiv.org/pdf/1709.07492.pdf)
+- Sparse-to-dense structure (no RGB guided) released by [Sparse-to-Dense: Depth Prediction from Sparse Depth Samples and a Single Image](https://arxiv.org/pdf/1709.07492.pdf)
 
 ## Usage
 
@@ -41,7 +41,7 @@ download [Kitti](http://www.cvlibs.net/datasets/kitti/eval_depth.php?benchmark=d
 ```
 
 ### Train
-modify the training script and run by
+modify the training script, run by
 ```
 sh scripts/train.sh
 ```
@@ -53,14 +53,14 @@ compile the benchmark evaluation code
 cd data/kitti/devkit/cpp
 sh make.sh
 ```
-validate on the selection of valset images(1000 images of size 1216x352, cropped and manually), run the testing script following by the folder path of checkpoints, the gpu device id, and the architecture name, eg.
+validate on the selected valset (1000 images of size 1216x352, cropped and manually), run the testing script following by the folder path of checkpoints, the gpu device id, and the architecture name, eg.
 ```
 sh scripts/test.sh ./checkpoints/kitti/sparseconv/masked_maeloss_adam 0 sparseconv
 ```
 the evaluation logs and generated images will be save in `./checkpoints/kitti/sparseconv/masked_maeloss_adam/results`.
 
 ## <a name="experiments"></a>Experiments
-The following results is evaluated on [Kitti](http://www.cvlibs.net/datasets/kitti/eval_depth.php?benchmark=depth_completion) selected val set, and the training scripts are only for reference, maybe not necessarily optimal.
+The following results is evaluated on [Kitti](http://www.cvlibs.net/datasets/kitti/eval_depth.php?benchmark=depth_completion) selected valset, and the training scripts are only for reference, maybe not necessarily optimal. **Download the models by clicking on the name of methods.**
 
 |    Method                 | loss   |   MAE    |  RMSE    |  iMAE    |  iRMSE   |   Training Script     |
 | :------------------------ | :----: | :------: | :------: | :------: | :------: | :----------- |
