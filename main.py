@@ -20,7 +20,6 @@ import torch.utils.data
 from torch.optim import lr_scheduler
 
 import models
-from models.SparseConvNet import *
 import datasets
 from datasets.depth_loader import DepthDataset
 from util.utils import AverageMeter, Logger, save_checkpoint, Evaluate
