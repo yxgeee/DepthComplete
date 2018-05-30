@@ -1,4 +1,4 @@
-# Pytorch implementation of depth completion structures
+# Pytorch implementation of depth completion architectures
 
 ## Dependencies
 - Python 2.7.*
