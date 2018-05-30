@@ -4,12 +4,10 @@ from __future__ import absolute_import
 
 from .SparseConvNet import *
 from .StoDNet import *
-from .PConvUNet import *
 
 __factory = {
     'sparseconv': SparseConvNet,
     'sparsetodense': StoDResNet,
-    'pconvunet': UNet,
 }
 
 def get_names():

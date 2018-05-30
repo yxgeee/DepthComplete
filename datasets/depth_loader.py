@@ -29,7 +29,6 @@ class DepthDataset(Dataset):
         self.width = width
         self.isVal = isVal
         self.totensor = T.ToTensor()
-        # TODO transform: flip, scale/crop, eraser
 
     def __len__(self):
         return len(self.dataset['raw'])

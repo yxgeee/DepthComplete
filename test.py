@@ -54,7 +54,6 @@ def main():
     args.resume = osp.join(args.resume, 'best_model.pth.tar')
 
     save_root = osp.join(osp.dirname(args.resume), 'results')
-    # args.save_root = osp.join(args.save_root, args.dataset, args.tag, 'results')
     if not osp.isdir(save_root):
         os.makedirs(save_root)
     print("==========\nArgs:{}\n==========".format(args))
@@ -62,7 +61,7 @@ def main():
     print("=> creating model '{}'".format(args.arch))
     model = models.init_model(name=args.arch)
     print("Model size: {:.5f}M".format(sum(p.numel() for p in model.parameters())/1000000.0))
-    # optionally resume from a checkpoint
+
     if os.path.isfile(args.resume):
         print("=> loading checkpoint '{}'".format(args.resume))
         checkpoint = torch.load(args.resume)

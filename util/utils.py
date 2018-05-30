@@ -99,7 +99,6 @@ class Evaluate(object):
     def pipline(self):
         return self.rmse
 
-    # def update(self, irmse, imae, rmse, mae, log_rmse, log_mae, absrel, sqrel):
     # def update(self, result):
     #     self.irmse, self.imae = result.irmse, result.imae
     #     self.rmse, self.mae = result.rmse, result.mae

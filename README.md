@@ -1,4 +1,4 @@
-# Pytorch implementation of depth completion (updating)
+# Pytorch implementation of depth completion structures
 
 ## Dependencies
 - Python 2.7.*
@@ -8,41 +8,60 @@
 - [Kitti](http://www.cvlibs.net/datasets/kitti/eval_depth.php?benchmark=depth_completion) depth complete dataset
 - SparseConv structure released by [Sparsity Invariant CNNs](http://arxiv.org/abs/1708.06500)
 - Sparse-to-dense structure released by [Sparse-to-Dense: Depth Prediction from Sparse Depth Samples and a Single Image](https://arxiv.org/pdf/1709.07492.pdf)
-- Partial Convolution based U-Net structure released by [Image Inpainting for Irregular Holes Using Partial Convolutions](http://arxiv.org/abs/1804.07723)
 
-## TODO
-- train U-net
-- generate sparse data by random sample augmentation
-- Crf post-process or end-to-end training
-- RGB guided
+## Usage
 
-## How to use
-
-### Download dataset (eg. Kitti)
+### Download the code
 ```
-wget http://kitti.is.tue.mpg.de/kitti/data_depth_velodyne.zip
-wget http://kitti.is.tue.mpg.de/kitti/data_depth_annotated.zip
-wget http://kitti.is.tue.mpg.de/kitti/data_depth_selection.zip
-wget http://www.cvlibs.net/downloads/depth_devkit.zip
+git clone -b release http://path/to/this/repository/
 ```
-### Prepare the data folder
-unzip all downloaded zip files in the root path of kitti directory
+
+### Prepare the data
+create the data folder by
 ```
 mkdir data
-ln -s /your/path/to/kitti/ data/kitti
+mkdir data/kitti
 ```
+download [Kitti](http://www.cvlibs.net/datasets/kitti/eval_depth.php?benchmark=depth_completion) dataset, and unzip all files into the same base directory (./data/kitti), the folder structure will look like this
+```
+|-- data
+  |-- kitti
+    |-- devkit
+    |-- depth_selection
+      |-- test_depth_completion_anonymous
+      |-- val_selection_cropped
+    |-- train
+      |-- 2011_xx_xx_drive_xxxx_sync
+        |-- proj_depth
+          |-- groundtruth
+          |-- velodyne_raw
+      |-- ... (all drives of all days in the raw KITTI dataset)
+    |-- val
+      |-- (same as in train)
+```
+
 ### Train
+modify the training script and run by
 ```
 sh scripts/train.sh
 ```
-### Test
-```
-sh scripts/test.sh ./checkpoints/kitti/sparseconv_masked_maeloss 0 sparseconv
-```
+and scripts are referred to [experiments](#experiments).
 
-## Experiments
-### Evaluate on [Kitti](http://www.cvlibs.net/datasets/kitti/eval_depth.php?benchmark=depth_completion) selected val set
-|    Method                 | loss   |   MAE    |  RMSE    |  iMAE    |  iRMSE   |   Script     |
+### Generate dense depth images and test by official tools
+compile the benchmark evaluation code
+```
+cd data/kitti/devkit/cpp
+sh make.sh
+```
+validate on the selection of valset images(1000 images of size 1216x352, cropped and manually), run the testing script following by the folder path of checkpoints, the gpu device id, and the architecture name, eg.
+```
+sh scripts/test.sh ./checkpoints/kitti/sparseconv/masked_maeloss_adam 0 sparseconv
+```
+the evaluation logs and generated images will be save in `./checkpoints/kitti/sparseconv/masked_maeloss_adam/results`.
+
+## <a name="experiments"></a>Experiments
+The following results is evaluated on [Kitti](http://www.cvlibs.net/datasets/kitti/eval_depth.php?benchmark=depth_completion) selected val set, and the training scripts are only for reference, maybe not necessarily optimal.
+|    Method                 | loss   |   MAE    |  RMSE    |  iMAE    |  iRMSE   |   Training Script     |
 | :------------------------ | :----: | :------: | :------: | :------: | :------: | :----------- |
-| SparseConv                | mae    | 0.484260 | 1.777299 | 0.001947 | 0.006476 |              |
-| SparsetoDense(d)          | mae    | 0.425472 | 1.670506 | 0.001736 | 0.005809 |              |
+| [SparseConv](https://drive.google.com/open?id=1uC0MR9q4donBt_EDy66UBqK7H_H6olwD) | mae | 0.484260 | 1.777299 | 0.001947 | 0.006476 | python main.py --gpu-ids 0,1,2,3,4,5 -a sparseconv -b 64 --epochs 40 --step-size 20 --eval-step 1 --lr 0.001 --gamma 0.5 --criterion masked_maeloss --tag adam --optim adam |
+| [SparsetoDense(d)](https://drive.google.com/open?id=1hgPwwkenRhHLP7WnMtCTZcqKyAMNvYbc) | mae | 0.425472 | 1.670506 | 0.001736 | 0.005809 | python main.py --gpu-ids 0,1 -a sparsetodense -b 32 --epochs 40 --step-size 8 --eval-step 1 --lr 0.01 --gamma 0.5 --criterion masked_maeloss --tag sgd --optim sgd |
