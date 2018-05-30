@@ -7,7 +7,7 @@
 ## Support
 - [Kitti](http://www.cvlibs.net/datasets/kitti/eval_depth.php?benchmark=depth_completion) depth complete dataset
 - SparseConv structure released by [Sparsity Invariant CNNs](http://arxiv.org/abs/1708.06500)
-- Sparse-to-dense structure (no RGB guided) released by [Sparse-to-Dense: Depth Prediction from Sparse Depth Samples and a Single Image](https://arxiv.org/pdf/1709.07492.pdf)
+- Sparse-to-Dense structure (no RGB guided) released by [Sparse-to-Dense: Depth Prediction from Sparse Depth Samples and a Single Image](https://arxiv.org/pdf/1709.07492.pdf)
 
 ## Usage
 
@@ -65,4 +65,4 @@ The following results is evaluated on [Kitti](http://www.cvlibs.net/datasets/kit
 |    Method                 | loss   |   MAE    |  RMSE    |  iMAE    |  iRMSE   |   Training Script     |
 | :------------------------ | :----: | :------: | :------: | :------: | :------: | :----------- |
 | [SparseConv](https://drive.google.com/open?id=1uC0MR9q4donBt_EDy66UBqK7H_H6olwD) | mae | 0.484260 | 1.777299 | 0.001947 | 0.006476 | python main.py --gpu-ids 0,1,2,3,4,5 -a sparseconv -b 64 --epochs 40 --step-size 20 --eval-step 1 --lr 0.001 --gamma 0.5 --criterion masked_maeloss --tag adam --optim adam |
-| [SparsetoDense(d)](https://drive.google.com/open?id=1hgPwwkenRhHLP7WnMtCTZcqKyAMNvYbc) | mae | 0.425472 | 1.670506 | 0.001736 | 0.005809 | python main.py --gpu-ids 0,1 -a sparsetodense -b 32 --epochs 40 --step-size 8 --eval-step 1 --lr 0.01 --gamma 0.5 --criterion masked_maeloss --tag sgd --optim sgd |
+| [Sparse-to-Dense(d)](https://drive.google.com/open?id=1hgPwwkenRhHLP7WnMtCTZcqKyAMNvYbc) | mae | 0.425472 | 1.670506 | 0.001736 | 0.005809 | python main.py --gpu-ids 0,1 -a sparsetodense -b 32 --epochs 40 --step-size 8 --eval-step 1 --lr 0.01 --gamma 0.5 --criterion masked_maeloss --tag sgd --optim sgd |
